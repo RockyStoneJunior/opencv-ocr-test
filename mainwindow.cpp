@@ -3,9 +3,12 @@
 
 #include <QtDebug>
 #include <QString>
+#include <QtConcurrent>
+#include <QFuture>
 
 #include <opencv2/core/core.hpp>
 #include <opencv2/highgui/highgui.hpp>
+#include <opencv2/imgproc/imgproc.hpp>
 
 #include <iostream>
 #include <string>
@@ -21,8 +24,7 @@ MainWindow::MainWindow(QWidget *parent) :
     ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
-    //VideoTest();
-    OcrTest();
+    QFuture<void> QtConcurrent::run(DisplayVideoOnLabel);
 }
 
 void MainWindow::VideoTest()
@@ -36,6 +38,22 @@ void MainWindow::VideoTest()
         cap >> frame;
         if(frame.empty()) break;
         cv::imshow("Video", frame);
+        if(cv::waitKey(33) >= 0) break;
+    }
+}
+
+void MainWindow::DisplayVideoOnLabel()
+{
+    cv::VideoCapture cap;
+    cap.open("http://admin:12345@192.168.31.14:8081");
+
+    cv::Mat frame;
+    for(;;){
+        cap >> frame;
+        if(frame.empty()) break;
+        cvtColor(frame, frame, CV_BGR2RGB);
+        ui->image_lbl->setPixmap(QPixmap::fromImage(QImage(frame.data,
+            frame.cols, frame.rows, frame.step, QImage::Format_RGB888)));
         if(cv::waitKey(33) >= 0) break;
     }
 }

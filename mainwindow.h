@@ -18,6 +18,8 @@ public:
     void VideoTest();
     void OcrTest();
 
+    void DisplayVideoOnLabel();
+
 private:
     Ui::MainWindow *ui;
 };
