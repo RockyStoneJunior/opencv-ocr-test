@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>787</width>
-    <height>653</height>
+    <width>1289</width>
+    <height>660</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -17,14 +17,79 @@
    <widget class="QLabel" name="image_lbl">
     <property name="geometry">
      <rect>
-      <x>170</x>
-      <y>10</y>
-      <width>461</width>
-      <height>431</height>
+      <x>3</x>
+      <y>3</y>
+      <width>640</width>
+      <height>480</height>
      </rect>
+    </property>
+    <property name="frameShape">
+     <enum>QFrame::Box</enum>
+    </property>
+    <property name="frameShadow">
+     <enum>QFrame::Sunken</enum>
     </property>
     <property name="text">
      <string/>
+    </property>
+   </widget>
+   <widget class="QLabel" name="trans_lbl">
+    <property name="geometry">
+     <rect>
+      <x>646</x>
+      <y>3</y>
+      <width>640</width>
+      <height>480</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <family>Courier New</family>
+      <pointsize>12</pointsize>
+     </font>
+    </property>
+    <property name="frameShape">
+     <enum>QFrame::Box</enum>
+    </property>
+    <property name="frameShadow">
+     <enum>QFrame::Sunken</enum>
+    </property>
+    <property name="text">
+     <string/>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="start_ocr_button">
+    <property name="geometry">
+     <rect>
+      <x>290</x>
+      <y>536</y>
+      <width>69</width>
+      <height>32</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Start OCR</string>
+    </property>
+   </widget>
+   <widget class="QPlainTextEdit" name="ocr_result">
+    <property name="geometry">
+     <rect>
+      <x>646</x>
+      <y>500</y>
+      <width>640</width>
+      <height>100</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <family>Courier New</family>
+      <pointsize>12</pointsize>
+      <weight>75</weight>
+      <bold>true</bold>
+     </font>
+    </property>
+    <property name="readOnly">
+     <bool>true</bool>
     </property>
    </widget>
   </widget>
@@ -33,7 +98,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>787</width>
+     <width>1289</width>
      <height>23</height>
     </rect>
    </property>

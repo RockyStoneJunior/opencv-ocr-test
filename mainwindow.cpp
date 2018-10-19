@@ -3,8 +3,10 @@
 
 #include <QtDebug>
 #include <QString>
-#include <QtConcurrent>
-#include <QFuture>
+#include <QThread>
+
+#include "worker.h"
+#include "ocr.h"
 
 #include <opencv2/core/core.hpp>
 #include <opencv2/highgui/highgui.hpp>
@@ -24,37 +26,51 @@ MainWindow::MainWindow(QWidget *parent) :
     ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
-    QFuture<void> QtConcurrent::run(DisplayVideoOnLabel);
+
+    start_ocr = false;
+    ocr_finish = true;
+
+    QThread* thread = new QThread();
+
+    Worker* worker = new Worker();
+    worker->moveToThread(thread);
+
+    connect(thread, SIGNAL(started()), worker, SLOT(process()));
+    connect(thread, SIGNAL(finished()), thread, SLOT(deleteLater()));
+    connect(worker, SIGNAL(finished()), worker, SLOT(deleteLater()));
+    connect(worker, SIGNAL(display(cv::Mat)), this, SLOT(DisplayVideoOnLabel(cv::Mat)));
+    thread->start();
+
+    connect(ui->start_ocr_button, SIGNAL(released()), this, SLOT(onStartOcrButtonClicked()));
 }
 
-void MainWindow::VideoTest()
+void MainWindow::DisplayVideoOnLabel(cv::Mat frame)
 {
-    cv::namedWindow("Video", cv::WND_PROP_AUTOSIZE);
-    cv::VideoCapture cap;
-    cap.open("http://admin:12345@192.168.31.14:8081");
+    cv::Mat display_frame, trans_frame;
 
-    cv::Mat frame;
-    for(;;){
-        cap >> frame;
-        if(frame.empty()) break;
-        cv::imshow("Video", frame);
-        if(cv::waitKey(33) >= 0) break;
-    }
-}
+    cvtColor(frame, display_frame, CV_BGR2RGB);
+    ui->image_lbl->setPixmap(QPixmap::fromImage(QImage(display_frame.data,
+    display_frame.cols, display_frame.rows, display_frame.step, QImage::Format_RGB888)));
 
-void MainWindow::DisplayVideoOnLabel()
-{
-    cv::VideoCapture cap;
-    cap.open("http://admin:12345@192.168.31.14:8081");
+    if(!start_ocr)
+    {
+        ui->trans_lbl->setPixmap(QPixmap::fromImage(QImage(display_frame.data,
+        display_frame.cols, display_frame.rows, display_frame.step, QImage::Format_RGB888)));
+    }else{
 
-    cv::Mat frame;
-    for(;;){
-        cap >> frame;
-        if(frame.empty()) break;
-        cvtColor(frame, frame, CV_BGR2RGB);
-        ui->image_lbl->setPixmap(QPixmap::fromImage(QImage(frame.data,
-            frame.cols, frame.rows, frame.step, QImage::Format_RGB888)));
-        if(cv::waitKey(33) >= 0) break;
+        if(ocr_finish)
+        {
+            QThread* thread = new QThread();
+            Ocr* ocr = new Ocr(frame);
+            ocr->moveToThread(thread);
+
+            connect(thread, SIGNAL(started()), ocr, SLOT(process_ocr()));
+            connect(ocr, SIGNAL(finish_ocr(QString)), this, SLOT(dispalyOcrResult(QString)));
+            thread->start();
+
+            ocr_finish = false;
+            ui->start_ocr_button->setDisabled(true);
+        }
     }
 }
 
@@ -73,6 +89,26 @@ void MainWindow::OcrTest()
     outText = string(ocr->GetUTF8Text());
     QString str = QString::fromStdString(outText);
     qDebug()<< str;
+}
+
+void MainWindow::onStartOcrButtonClicked()
+{
+    if(start_ocr)
+    {
+        start_ocr = false;
+        ui->start_ocr_button->setText("Start OCR");
+        ui->ocr_result->clear();
+    }else{
+        start_ocr = true;
+        ocr_finish = true;
+        ui->start_ocr_button->setText("Stop OCR");
+    }
+}
+
+void MainWindow::dispalyOcrResult(QString str)
+{
+    ui->ocr_result->setPlainText(str);
+    ui->start_ocr_button->setDisabled(false);
 }
 
 MainWindow::~MainWindow()

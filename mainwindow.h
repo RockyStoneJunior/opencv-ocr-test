@@ -2,6 +2,7 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
+#include <opencv2/core/core.hpp>
 
 namespace Ui {
 class MainWindow;
@@ -18,10 +19,15 @@ public:
     void VideoTest();
     void OcrTest();
 
-    void DisplayVideoOnLabel();
+public slots:
+    void DisplayVideoOnLabel(cv::Mat frame);
+    void onStartOcrButtonClicked();
+    void dispalyOcrResult(QString str);
 
 private:
     Ui::MainWindow *ui;
+    bool start_ocr;
+    bool ocr_finish;
 };
 
 #endif // MAINWINDOW_H
